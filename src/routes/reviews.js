@@ -35,7 +35,7 @@ router.get("/:id", async (req, res, next) => {
 		if (!review) {
 			res.status(404).json({message: `Review with id ${id} not found`});
 		} else {
-			res.status(200).json(Review);
+			res.status(200).json(review);
 		}
 	} catch (error) {
 		next(error);

@@ -4,7 +4,6 @@ import login from "../services/auth/login.js";
 const router = Router();
 
 router.post("/", async (req, res, next) => {
-	console.log("Login route hit!");
 	try {
 		const {username, password} = req.body;
 		const token = await login(username, password);

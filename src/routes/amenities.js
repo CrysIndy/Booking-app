@@ -1,9 +1,9 @@
 import {Router} from "express";
-import getAmenities from "../services/Amenities/getAmenities.js";
-import createAmenity from "../services/Amenities/createAmenity.js";
-import getAmenityById from "../services/Amenities/getAmenityById.js";
-import deleteAmenityById from "../services/Amenities/deleteAmenityById.js";
-import updateAmenityById from "../services/Amenities/updateAmenityById.js";
+import getAmenities from "../services/amenities/getAmenities.js";
+import createAmenity from "../services/amenities/createAmenity.js";
+import getAmenityById from "../services/amenities/getAmenityById.js";
+import deleteAmenityById from "../services/amenities/deleteAmenityById.js";
+import updateAmenityById from "../services/amenities/updateAmenityById.js";
 import auth from "../middleware/auth.js";
 
 const router = Router();

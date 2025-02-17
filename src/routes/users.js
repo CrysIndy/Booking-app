@@ -10,7 +10,8 @@ const router = Router();
 
 router.get("/", async (req, res, next) => {
 	try {
-		const users = await getUsers();
+		const {username, email} = req.query;
+		const users = await getUsers(username, email);
 		res.json(users);
 	} catch (error) {
 		next(error);
@@ -19,8 +20,15 @@ router.get("/", async (req, res, next) => {
 
 router.post("/", auth, async (req, res, next) => {
 	try {
-		const {name, password, username, image} = req.body;
-		const newUser = await createUser(username, name, password, image);
+		const {username, password, name, email, phoneNumber, profilePicture} = req.body;
+		const newUser = await createUser(
+			username,
+			password,
+			name,
+			email,
+			phoneNumber,
+			profilePicture,
+		);
 		res.status(201).json(newUser);
 	} catch (error) {
 		next(error);

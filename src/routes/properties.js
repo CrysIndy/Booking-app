@@ -80,7 +80,7 @@ router.delete("/:id", auth, async (req, res, next) => {
 		if (property) {
 			res.status(200).send({
 				message: `Property with id ${id} successfully deleted`,
-				Property,
+				property,
 			});
 		} else {
 			res.status(404).json({

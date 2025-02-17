@@ -10,7 +10,8 @@ const router = Router();
 
 router.get("/", async (req, res, next) => {
 	try {
-		const hosts = await getHosts();
+		const {name} = req.query;
+		const hosts = await getHosts(name);
 		res.json(hosts);
 	} catch (error) {
 		next(error);
@@ -19,8 +20,17 @@ router.get("/", async (req, res, next) => {
 
 router.post("/", auth, async (req, res, next) => {
 	try {
-		const {name, email, phoneNumber, profilePicture, aboutMe} = req.body;
-		const newHost = await createHost(name, email, phoneNumber, profilePicture, aboutMe);
+		const {username, password, name, email, phoneNumber, profilePicture, aboutMe} =
+			req.body;
+		const newHost = await createHost(
+			username,
+			password,
+			name,
+			email,
+			phoneNumber,
+			profilePicture,
+			aboutMe,
+		);
 		res.status(201).json(newHost);
 	} catch (error) {
 		next(error);
@@ -45,12 +55,12 @@ router.get("/:id", async (req, res, next) => {
 router.delete("/:id", auth, async (req, res, next) => {
 	try {
 		const {id} = req.params;
-		const host = await deleteHostById(id);
+		const deletedHost = await deleteHostById(id);
 
-		if (host) {
+		if (deletedHost) {
 			res.status(200).send({
 				message: `Host with id ${id} successfully deleted`,
-				Host,
+				deletedHost,
 			});
 		} else {
 			res.status(404).json({
