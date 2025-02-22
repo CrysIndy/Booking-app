@@ -2,15 +2,28 @@ import {PrismaClient} from "@prisma/client";
 
 const prisma = new PrismaClient();
 const createUser = async (
+	email,
 	username,
 	password,
 	name,
-	email,
 	phoneNumber,
 	profilePicture,
 ) => {
-	return await prisma.user.create({
-		data: {username, password, name, email, phoneNumber, profilePicture},
+	const existingUser = await prisma.user.findFirst({where: {username}});
+
+	if (existingUser) {
+		throw new Error("Username is already taken");
+	}
+
+	return prisma.user.create({
+		data: {
+			email,
+			username,
+			password,
+			name,
+			phoneNumber,
+			profilePicture,
+		},
 	});
 };
 

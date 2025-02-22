@@ -1,13 +1,18 @@
 import {PrismaClient} from "@prisma/client";
 
+const prisma = new PrismaClient();
 const getProperties = async (location, pricePerNight, amenities) => {
-	const prisma = new PrismaClient();
-
 	return prisma.property.findMany({
 		where: {
-			location,
-			pricePerNight,
-			amenities: amenities ? {some: {name: {in: amenities}}} : undefined,
+			...(location && {location}),
+			...(pricePerNight && {pricePerNight: parseFloat(pricePerNight)}),
+			...(amenities && {
+				amenities: {
+					some: {
+						name: {in: amenities.split(",")},
+					},
+				},
+			}),
 		},
 		include: {
 			amenities: true,

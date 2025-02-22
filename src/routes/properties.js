@@ -11,18 +11,10 @@ const router = Router();
 router.get("/", async (req, res, next) => {
 	try {
 		const {location, pricePerNight, amenities} = req.query;
-
-		const price = pricePerNight ? parseFloat(pricePerNight) : undefined;
-		const amenitiesArray = amenities ? amenities.split(",") : undefined;
-		console.log("Query parameters:", {
-			location,
-			price: pricePerNight,
-			amenities: amenitiesArray,
-		});
-
-		const properties = await getProperties(location, price, amenitiesArray);
+		const properties = await getProperties(location, pricePerNight, amenities);
 		res.json(properties);
 	} catch (error) {
+		console.error("Error fetching properties:", error);
 		next(error);
 	}
 });
@@ -37,9 +29,24 @@ router.post("/", auth, async (req, res, next) => {
 			bedroomCount,
 			bathRoomCount,
 			maxGuestCount,
-			hostId,
 			rating,
+			hostId,
 		} = req.body;
+
+		if (
+			!title ||
+			!description ||
+			!location ||
+			!pricePerNight ||
+			!bedroomCount ||
+			!bathRoomCount ||
+			!maxGuestCount ||
+			!rating ||
+			!hostId
+		) {
+			return res.status(400).json({message: "All fields are required"});
+		}
+
 		const newProperty = await createProperty(
 			title,
 			description,
@@ -49,14 +56,29 @@ router.post("/", auth, async (req, res, next) => {
 			bathRoomCount,
 			maxGuestCount,
 			hostId,
-			rating,
+			Number(rating),
 		);
+
 		res.status(201).json(newProperty);
 	} catch (error) {
+		console.error("Error creating property:", error);
+
+		if (
+			error.message === "Title is not valid" ||
+			error.message === "Description is not valid" ||
+			error.message === "Location is not valid" ||
+			error.message === "Price per night is not valid" ||
+			error.message === "Bedrooms are not valid" ||
+			error.message === "Bathrooms are not valid" ||
+			error.message === "Maximum guests is not valid" ||
+			error.message === "Rating is not valid"
+		) {
+			return res.status(400).json({message: error.message});
+		}
+
 		next(error);
 	}
 });
-
 router.get("/:id", async (req, res, next) => {
 	try {
 		const {id} = req.params;
@@ -75,20 +97,21 @@ router.get("/:id", async (req, res, next) => {
 router.delete("/:id", auth, async (req, res, next) => {
 	try {
 		const {id} = req.params;
-		const property = await deletePropertyById(id);
+		const deletedProperty = await deletePropertyById(id);
 
-		if (property) {
-			res.status(200).send({
-				message: `Property with id ${id} successfully deleted`,
-				property,
-			});
-		} else {
-			res.status(404).json({
+		if (deletedProperty === null) {
+			return res.status(404).json({
 				message: `Property with id ${id} not found`,
 			});
 		}
+
+		res.status(200).json({
+			message: `Property with id ${id} successfully deleted`,
+			deletedProperty,
+		});
 	} catch (error) {
-		next(error);
+		console.error("Error during deletion:", error);
+		res.status(500).json({message: "Internal Server Error", error: error.message});
 	}
 });
 
@@ -103,7 +126,7 @@ router.put("/:id", auth, async (req, res, next) => {
 			bedroomCount,
 			bathRoomCount,
 			maxGuestCount,
-			hostId,
+			PropertyId,
 			rating,
 		} = req.body;
 		const property = await updatePropertyById(id, {
@@ -114,7 +137,7 @@ router.put("/:id", auth, async (req, res, next) => {
 			bedroomCount,
 			bathRoomCount,
 			maxGuestCount,
-			hostId,
+			PropertyId,
 			rating,
 		});
 

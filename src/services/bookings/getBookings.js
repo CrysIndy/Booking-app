@@ -1,9 +1,13 @@
 import {PrismaClient} from "@prisma/client";
 
-const getBooking = async () => {
-	const prisma = new PrismaClient();
-
-	return prisma.booking.findMany();
+const prisma = new PrismaClient();
+const getBookings = async (id, userId) => {
+	return prisma.booking.findMany({
+		where: {
+			...(id && {id}),
+			...(userId && {userId}),
+		},
+	});
 };
 
-export default getBooking;
+export default getBookings;

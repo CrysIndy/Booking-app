@@ -10,8 +10,24 @@ const createHost = async (
 	profilePicture,
 	aboutMe,
 ) => {
+	const existingHost = await prisma.host.findUnique({
+		where: {username},
+	});
+
+	if (existingHost) {
+		throw new Error("Username is already taken");
+	}
+
 	return prisma.host.create({
-		data: {username, password, name, email, phoneNumber, profilePicture, aboutMe},
+		data: {
+			username,
+			password,
+			name,
+			email,
+			phoneNumber,
+			profilePicture,
+			aboutMe,
+		},
 	});
 };
 

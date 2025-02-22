@@ -22,17 +22,41 @@ router.post("/", auth, async (req, res, next) => {
 	try {
 		const {username, password, name, email, phoneNumber, profilePicture, aboutMe} =
 			req.body;
+
+		if (
+			!username ||
+			!password ||
+			!name ||
+			!email ||
+			!phoneNumber ||
+			!profilePicture ||
+			!aboutMe
+		) {
+			return res.status(400).json({message: "All fields are required"});
+		}
+
 		const newHost = await createHost(
-			username,
-			password,
+			req.body.username,
+			req.body.password,
 			name,
 			email,
 			phoneNumber,
 			profilePicture,
 			aboutMe,
 		);
+
 		res.status(201).json(newHost);
 	} catch (error) {
+		console.error("Error creating host:", error);
+
+		if (error.code === "P2002" && error.meta?.target?.includes("username")) {
+			return res.status(400).json({message: "Username is already taken"});
+		}
+
+		if (error.message === "Username is already taken") {
+			return res.status(400).json({message: error.message});
+		}
+
 		next(error);
 	}
 });
@@ -57,18 +81,19 @@ router.delete("/:id", auth, async (req, res, next) => {
 		const {id} = req.params;
 		const deletedHost = await deleteHostById(id);
 
-		if (deletedHost) {
-			res.status(200).send({
-				message: `Host with id ${id} successfully deleted`,
-				deletedHost,
-			});
-		} else {
-			res.status(404).json({
+		if (!deletedHost) {
+			return res.status(404).json({
 				message: `Host with id ${id} not found`,
 			});
 		}
+
+		res.status(200).json({
+			message: `Host with id ${id} successfully deleted`,
+			deletedHost,
+		});
 	} catch (error) {
-		next(error);
+		console.error("Error during deletion:", error);
+		res.status(500).json({message: "Internal Server Error", error: error.message});
 	}
 });
 

@@ -33,6 +33,17 @@ async function main() {
 		});
 	}
 
+	for (const amenity of amenities) {
+		await prisma.amenity.upsert({
+			where: {id: amenity.id},
+			update: {},
+			create: {
+				id: amenity.id,
+				name: amenity.name,
+			},
+		});
+	}
+
 	for (const property of properties) {
 		await prisma.property.upsert({
 			where: {id: property.id},
@@ -48,19 +59,12 @@ async function main() {
 				maxGuestCount: property.maxGuestCount,
 				hostId: property.hostId,
 				rating: property.rating,
-				amenities: property.amenities,
-			},
-		});
-	}
-
-	for (const amenity of amenities) {
-		await prisma.amenity.upsert({
-			where: {id: amenity.id},
-			update: {},
-			create: {
-				id: amenity.id,
-				name: amenity.name,
-				properties: amenity.properties,
+				amenities:
+					property.amenities && Array.isArray(property.amenities)
+						? {
+								connect: property.amenities.map((amenityId) => ({id: amenityId})),
+						  }
+						: undefined,
 			},
 		});
 	}

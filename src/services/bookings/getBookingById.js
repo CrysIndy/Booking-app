@@ -1,12 +1,13 @@
 import {PrismaClient} from "@prisma/client";
 
-const getBookingById = async (id) => {
-	const prisma = new PrismaClient();
-	const booking = await prisma.booking.findUnique({
-		where: {id},
+const prisma = new PrismaClient();
+const getBookingById = async (id, userId) => {
+	return prisma.booking.findFirst({
+		where: {
+			id,
+			userId,
+		},
 	});
-
-	return booking;
 };
 
 export default getBookingById;

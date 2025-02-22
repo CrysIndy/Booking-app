@@ -18,19 +18,35 @@ router.get("/", async (req, res, next) => {
 	}
 });
 
-router.post("/", auth, async (req, res, next) => {
+router.post("/", async (req, res, next) => {
 	try {
-		const {username, password, name, email, phoneNumber, profilePicture} = req.body;
+		const {email, username, password, name, phoneNumber, profilePicture} = req.body;
+
+		if (!email || !username || !password || !name || !phoneNumber || !profilePicture) {
+			return res.status(400).json({message: "All fields are required"});
+		}
+
 		const newUser = await createUser(
+			email,
 			username,
 			password,
 			name,
-			email,
 			phoneNumber,
 			profilePicture,
 		);
+
 		res.status(201).json(newUser);
 	} catch (error) {
+		console.error("Error creating user:", error);
+
+		if (error.code === "P2002" && error.meta?.target?.includes("email")) {
+			return res.status(400).json({message: "Email is already taken"});
+		}
+
+		if (error.message === "Email is already taken") {
+			return res.status(400).json({message: error.message});
+		}
+
 		next(error);
 	}
 });

@@ -30,6 +30,19 @@ router.post("/", auth, async (req, res, next) => {
 			propertyId,
 		} = req.body;
 
+		if (
+			!checkinDate ||
+			!checkoutDate ||
+			!numberOfGuests ||
+			!totalPrice ||
+			!bookingStatus
+		) {
+			return res.status(400).json({message: "All fields are required"});
+		}
+		if (!userId || !propertyId) {
+			return res.status(400).json({message: "User ID and Property ID are required"});
+		}
+
 		const newBooking = await createBooking(
 			checkinDate,
 			checkoutDate,
@@ -41,6 +54,18 @@ router.post("/", auth, async (req, res, next) => {
 		);
 		res.status(201).json(newBooking);
 	} catch (error) {
+		console.error("Error creating booking:", error);
+
+		if (
+			error.message === "Checkin date is not valid" ||
+			error.message === "Checkout date is not valid" ||
+			error.message === "Number of guests is not valid" ||
+			error.message === "Price total is not valid" ||
+			error.message === "Booking status is not valid"
+		) {
+			return res.status(400).json({message: error.message});
+		}
+
 		next(error);
 	}
 });
@@ -48,10 +73,12 @@ router.post("/", auth, async (req, res, next) => {
 router.get("/:id", async (req, res, next) => {
 	try {
 		const {id} = req.params;
-		const booking = await getBookingById(id);
+		const {userId} = req.query;
+
+		const booking = await getBookingById(id, userId);
 
 		if (!booking) {
-			res.status(404).json({message: `Booking with id ${id} not found`});
+			res.status(404).json({message: `Booking with id ${id} not found for this user`});
 		} else {
 			res.status(200).json(booking);
 		}

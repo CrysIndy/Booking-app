@@ -21,8 +21,8 @@ const createProperty = async (
 			bedroomCount,
 			bathRoomCount,
 			maxGuestCount,
-			hostId,
 			rating,
+			hostId,
 		},
 	});
 };

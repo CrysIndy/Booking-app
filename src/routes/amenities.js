@@ -20,9 +20,20 @@ router.get("/", async (req, res, next) => {
 router.post("/", auth, async (req, res, next) => {
 	try {
 		const {name} = req.body;
+
+		if (!name) {
+			return res.status(400).json({message: "All fields are required"});
+		}
+
 		const newAmenity = await createAmenity(name);
 		res.status(201).json(newAmenity);
 	} catch (error) {
+		console.error("Error creating amenity:", error);
+
+		if (error.message === "Name is not valid") {
+			return res.status(400).json({message: error.message});
+		}
+
 		next(error);
 	}
 });
